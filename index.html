@@ -584,7 +584,7 @@
     <div>
       <div class="eyebrow">Caso 001 · Medio</div>
       <h1>Asesinato en la masía</h1>
-      <p class="dek">Un túrgido ha muerto en extrañas circunstancias. Usa las pistas para deducir dónde estaba cada túrgido y descubrir quien ha sido el asesino. Recuerda que en el pinar, solo puede estar el trompeta de The Poncho's!!</p>
+      <p class="dek">Un túrgido ha muerto en extrañas circunstancias. Usa las pistas para deducir dónde estaba cada túrgido y descubrir quien ha sido el asesino. Recuerda que en el pinar solo pueden estar Clara, Jaime y Juver!!</p>
     </div>
     <div class="badge">8 personas · tablero irregular</div>
   </header>
@@ -592,7 +592,7 @@
   <main class="layout">
     <aside class="panel">
       <h2>Personajes y pistas</h2>
-      <p class="rules"><b>Cómo jugar:</b> selecciona un personaje. <b>Un clic</b> añade o quita su inicial pequeña. <b>Mantén pulsado</b> para fijarlo. <b>Doble clic</b> pone una ✕. Las mesas y las bolsas bloquean casillas; las hormigas y el caballo no. <b>Importante:</b> el trompeta de The Poncho's solo toca la trompeta en el pinar.</p>
+      <p class="rules"><b>Cómo jugar:</b> selecciona un personaje. <b>Un clic</b> añade o quita su inicial pequeña. <b>Mantén pulsado</b> para fijarlo. <b>Doble clic</b> pone una ✕. Las mesas y las bolsas bloquean casillas; las hormigas y el caballo no. <b>Importante:</b> en el pinar solo pueden estar Clara, Jaime y Juver.</p>
       <div class="characters" id="characters"></div>
       <div class="tools">
         <span class="tool active">1 clic · posibilidad</span>
@@ -645,7 +645,7 @@ const people = [
   {id:'laura', name:'Laura', initials:'LA', clue:'Estaba en la Piscina. No estaba frente a una puerta.', victim:false},
   {id:'elena', name:'Elena', initials:'EL', clue:'Estaba en la fila inferior.', victim:false},
   {id:'juver', name:'Juver', initials:'JV', clue:'Estaba frente a una mesa.', victim:false},
-  {id:'jaime', name:'Jaime', initials:'JA', clue:"Era el trompeta de The Poncho's y solo tocaba la trompeta en el pinar.", victim:false},
+  {id:'jaime', name:'Jaime', initials:'JA', clue:"Es el trompeta de The Poncho's. Solo él toca la trompeta.", victim:false},
   {id:'juan', name:'Juan', initials:'JN', clue:'La víctima. Estaba a solas con el asesino.', victim:true}
 ];
 
@@ -776,6 +776,16 @@ const trumpetCells = new Set(
     .filter(([k,arr]) => arr.some(o => o.type === 'trumpet'))
     .map(([k]) => k)
 );
+
+
+const pinarAllowed = new Set(['clara','jaime','juver']);
+
+function canUsePinarCell(personId, key){
+  const [r,c] = key.split('-').map(Number);
+  const room = rooms[r][c];
+  if(room !== 'Pinar 1' && room !== 'Pinar 2') return true;
+  return pinarAllowed.has(personId);
+}
 
 function canUseTrumpetCell(personId, key){
   if(!trumpetCells.has(key)) return true;
@@ -956,6 +966,7 @@ function renderGrid(){
 function toggleCandidate(r,c){
   const k=cellKey(r,c);
   if(inactiveCells.has(k)) return;
+  if(!canUsePinarCell(selected,k)){show('En el pinar solo pueden estar Clara, Jaime y Juver.','warn');return}
   if(!canUseTrumpetCell(selected,k)){show("Jaime solo puede tocar una trompeta si está en el pinar.",'warn');return}
   if(permanentBlocked.has(k)){show('Esa casilla está ocupada por un elemento del escenario.','warn');return}
   if(blocked.has(k)){show('Esa casilla está descartada. Haz doble clic para quitar la ✕.','warn');return}
@@ -987,6 +998,7 @@ function toggleBlocked(r,c){
 function toggleLock(r,c){
   const k=cellKey(r,c);
   if(inactiveCells.has(k)) return;
+  if(!canUsePinarCell(selected,k)){show('En el pinar solo pueden estar Clara, Jaime y Juver.','warn');return}
   if(!canUseTrumpetCell(selected,k)){show("Jaime solo puede tocar una trompeta si está en el pinar.",'warn');return}
   if(permanentBlocked.has(k)){show('No se puede colocar a nadie sobre ese elemento.','warn');return}
   if(blocked.has(k))blocked.delete(k);
@@ -1066,7 +1078,7 @@ const hints=[
   'Laura está en la Piscina, pero no frente a ninguna puerta.',
   'Elena está en la fila 8.',
   'Juver está justo frente a una mesa.',
-  'Jaime es la única persona que comparte casilla con una trompeta.',
+  'Jaime es el trompeta de The Poncho's. Solo él toca la trompeta.',
   'Juan es la víctima. Cuando coloques al resto, busca quién queda a solas con él en la misma zona.'
 ];
 document.getElementById('hint').onclick=()=>{
