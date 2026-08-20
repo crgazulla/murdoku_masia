@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Murdoku — La última sobremesa</title>
+<style>
+  :root{
+    --paper:#f4ead8; --ink:#261f1a; --muted:#73685f; --line:#3a3028;
+    --card:#fffaf1; --accent:#8e2f2b; --ok:#2f6d4f; --warn:#a96422;
+    --shadow:0 12px 35px rgba(49,35,23,.12);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; color:var(--ink); background:
+      radial-gradient(circle at 20% 0%, rgba(255,255,255,.7), transparent 35%),
+      linear-gradient(135deg,#efe0c6,#f8f0e3 55%,#ead7bb);
+    font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+    min-height:100vh;
+  }
+  button{font:inherit}
+  .page{max-width:1180px;margin:auto;padding:24px}
+  header{
+    display:flex;gap:18px;justify-content:space-between;align-items:end;
+    border-bottom:2px solid var(--line);padding-bottom:16px;margin-bottom:20px
+  }
+  .eyebrow{font:700 12px/1.2 ui-sans-serif,system-ui;letter-spacing:.2em;text-transform:uppercase;color:var(--accent)}
+  h1{font-size:clamp(34px,6vw,68px);line-height:.92;margin:7px 0 4px;letter-spacing:-.045em}
+  .dek{max-width:690px;color:var(--muted);font-size:17px;margin:0}
+  .badge{font:700 12px ui-sans-serif,system-ui;border:1px solid var(--line);padding:7px 10px;border-radius:999px;white-space:nowrap;background:#fff7}
+  .layout{display:grid;grid-template-columns:330px minmax(420px,1fr);gap:24px}
+  .panel,.board-wrap{background:rgba(255,250,241,.88);border:1px solid #b9a58d;border-radius:18px;box-shadow:var(--shadow)}
+  .panel{padding:18px;align-self:start}
+  .panel h2{font-size:20px;margin:0 0 10px}
+  .rules{font:14px/1.45 ui-sans-serif,system-ui;color:#554b43;margin:0 0 16px}
+  .characters{display:grid;gap:9px}
+  .char{
+    width:100%;display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;
+    text-align:left;background:var(--card);border:1px solid #cdbba5;border-radius:12px;padding:9px;cursor:pointer;
+    transition:.15s transform,.15s border-color,.15s background
+  }
+  .char:hover{transform:translateY(-1px)}
+  .char.selected{border:2px solid var(--accent);padding:8px;background:#fff4e8}
+  .char.placed{opacity:.62}
+  .avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#30271f;color:#fff;font:700 15px ui-sans-serif,system-ui}
+  .char strong{font:700 14px ui-sans-serif,system-ui;display:block}
+  .char small{font:12px/1.3 ui-sans-serif,system-ui;color:var(--muted)}
+  .victim-tag{font:700 9px ui-sans-serif,system-ui;letter-spacing:.08em;text-transform:uppercase;background:var(--accent);color:white;padding:4px 6px;border-radius:6px}
+  .tools{display:flex;gap:8px;margin:14px 0 0;flex-wrap:wrap}
+  .tool{border:1px solid #9b8875;border-radius:10px;background:#fffaf1;padding:8px 10px;cursor:pointer;font:700 12px ui-sans-serif,system-ui}
+  .tool.active{background:#30271f;color:#fff}
+  .board-wrap{padding:18px}
+  .topline{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .status{font:700 13px ui-sans-serif,system-ui;color:#5e5148}
+  .grid{
+    display:grid;grid-template-columns:repeat(5,1fr);aspect-ratio:1/1;max-width:700px;margin:auto;
+    border:3px solid var(--line);background:#d6c5ae;position:relative
+  }
+  .cell{
+    position:relative;border:1px solid rgba(58,48,40,.45);min-width:0;cursor:pointer;overflow:hidden;
+    display:grid;place-items:center;padding:4px;user-select:none
+  }
+  .cell:hover{outline:3px solid rgba(142,47,43,.22);outline-offset:-3px}
+  .cell.blocked{cursor:not-allowed}
+  .room{position:absolute;left:5px;top:4px;font:700 clamp(7px,1.1vw,10px) ui-sans-serif,system-ui;text-transform:uppercase;letter-spacing:.05em;color:rgba(38,31,26,.56)}
+  .coord{position:absolute;right:4px;bottom:3px;font:9px ui-monospace,monospace;color:rgba(38,31,26,.35)}
+  .object{position:absolute;right:6px;top:22px;font-size:clamp(14px,2.2vw,24px);filter:saturate(.65)}
+  .person{
+    width:min(70%,70px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;
+    background:#30271f;color:white;border:3px solid #fff9;box-shadow:0 4px 12px #0003;
+    font:800 clamp(13px,2vw,19px) ui-sans-serif,system-ui;z-index:3
+  }
+  .person.victim{background:var(--accent)}
+  .xmark{font:900 clamp(28px,6vw,60px) ui-sans-serif,system-ui;color:rgba(142,47,43,.72);z-index:2;transform:rotate(-8deg)}
+  .room-terrace{background:#dec99f}.room-hall{background:#d9d1c4}.room-kitchen{background:#c9d4c0}
+  .room-entry{background:#d9c4b0}.room-dining{background:#d6b8a7}.room-study{background:#b8c2bd}
+  .room-living{background:#c9b8a5}.room-garden{background:#b8c9a9}
+  .legend{display:flex;flex-wrap:wrap;gap:7px;margin:15px auto 2px;max-width:700px;font:11px ui-sans-serif,system-ui;color:#62564c}
+  .legend span{padding:5px 7px;background:#fff8;border:1px solid #c8b7a2;border-radius:7px}
+  .actions{display:flex;gap:9px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+  .primary,.secondary{border-radius:11px;padding:10px 14px;cursor:pointer;font:800 13px ui-sans-serif,system-ui}
+  .primary{background:var(--accent);color:#fff;border:1px solid #71231f}
+  .secondary{background:#fffaf1;color:var(--ink);border:1px solid #9b8875}
+  .message{min-height:21px;text-align:center;margin-top:10px;font:700 13px ui-sans-serif,system-ui}
+  .message.ok{color:var(--ok)} .message.bad{color:var(--accent)} .message.warn{color:var(--warn)}
+  dialog{border:none;border-radius:18px;padding:0;max-width:520px;width:calc(100% - 32px);box-shadow:0 30px 90px #0006;background:var(--card);color:var(--ink)}
+  dialog::backdrop{background:#1f1914b8;backdrop-filter:blur(3px)}
+  .modal{padding:26px}.modal h2{font-size:34px;margin:0 0 8px}.modal p{font:15px/1.55 ui-sans-serif,system-ui;color:#554b43}
+  .killer{font-size:26px;color:var(--accent);font-weight:800}
+  .modal button{margin-top:8px}
+  @media(max-width:850px){
+    .page{padding:14px}.layout{grid-template-columns:1fr}.panel{order:2}.board-wrap{order:1;padding:11px}
+    header{align-items:start}.badge{display:none}.grid{width:100%}.room{font-size:6px}.object{top:18px}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div>
+      <div class="eyebrow">Caso 001 · Fácil</div>
+      <h1>La última sobremesa</h1>
+      <p class="dek">Álex apareció muerto después de una cena entre amigos. Coloca a las cinco personas en la casa usando sus pistas. El asesino fue la única persona que quedó a solas con la víctima en la misma estancia.</p>
+    </div>
+    <div class="badge">5 personas · 5×5</div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel">
+      <h2>Personajes y pistas</h2>
+      <p class="rules"><b>Regla:</b> solo puede haber una persona por fila y por columna. Selecciona un personaje y luego una casilla. Usa ✕ para marcar descartes.</p>
+      <div class="characters" id="characters"></div>
+      <div class="tools">
+        <button class="tool" id="placeMode">● Colocar</button>
+        <button class="tool" id="noteMode">✕ Descartar</button>
+        <button class="tool" id="eraseMode">⌫ Borrar</button>
+      </div>
+    </aside>
+
+    <section class="board-wrap">
+      <div class="topline">
+        <div class="eyebrow">Escena del crimen</div>
+        <div class="status" id="status">0 / 5 colocados</div>
+      </div>
+      <div class="grid" id="grid" aria-label="Cuadrícula de Murdoku"></div>
+      <div class="legend">
+        <span>🧶 alfombra</span><span>🪟 ventana</span><span>🛋️ sofá</span>
+        <span>Las etiquetas indican la estancia</span>
+      </div>
+      <div class="actions">
+        <button class="secondary" id="reset">Reiniciar</button>
+        <button class="secondary" id="hint">Dame una pista</button>
+        <button class="primary" id="check">Comprobar solución</button>
+      </div>
+      <div class="message" id="message"></div>
+    </section>
+  </main>
+</div>
+
+<dialog id="win">
+  <div class="modal">
+    <div class="eyebrow">Caso resuelto</div>
+    <h2>Has encontrado al asesino.</h2>
+    <p>Álex estaba en el <b>Salón</b>. La única otra persona en esa estancia era <span class="killer">Leo</span>. Por tanto, Leo fue quien estuvo a solas con la víctima.</p>
+    <p>La disposición correcta era: Nora C1 · Marcos E2 · Vera A3 · Leo D4 · Álex B5.</p>
+    <button class="primary" onclick="document.getElementById('win').close()">Cerrar</button>
+  </div>
+</dialog>
+
+<script>
+const people = [
+  {id:'nora', name:'Nora', initials:'NO', clue:'Estaba en la fila 1, sobre la alfombra.', victim:false},
+  {id:'marcos', name:'Marcos', initials:'MA', clue:'Estaba en la Cocina y en la columna E.', victim:false},
+  {id:'vera', name:'Vera', initials:'VE', clue:'Estaba justo debajo de la ventana.', victim:false},
+  {id:'leo', name:'Leo', initials:'LE', clue:'Estaba en el Salón, justo a la derecha del sofá.', victim:false},
+  {id:'alex', name:'Álex', initials:'AX', clue:'La víctima. Estaba en la última posición disponible.', victim:true}
+];
+
+const rooms = [
+ ['Terraza','Terraza','Terraza','Pasillo','Cocina'],
+ ['Entrada','Entrada','Comedor','Cocina','Cocina'],
+ ['Entrada','Entrada','Comedor','Cocina','Cocina'],
+ ['Estudio','Estudio','Salón','Salón','Salón'],
+ ['Estudio','Salón','Salón','Salón','Jardín']
+];
+const roomClass = {
+ 'Terraza':'terrace','Pasillo':'hall','Cocina':'kitchen','Entrada':'entry',
+ 'Comedor':'dining','Estudio':'study','Salón':'living','Jardín':'garden'
+};
+const objects = {'0-2':'🧶','1-0':'🪟','3-2':'🛋️'};
+const solution = {'0-2':'nora','1-4':'marcos','2-0':'vera','3-3':'leo','4-1':'alex'};
+
+let selected='nora', mode='place';
+let placements = {};   // cellKey -> person id
+let notes = new Set();
+let hintIndex = 0;
+
+const chars = document.getElementById('characters');
+const grid = document.getElementById('grid');
+const status = document.getElementById('status');
+const msg = document.getElementById('message');
+
+function renderCharacters(){
+  chars.innerHTML='';
+  const placedIds = new Set(Object.values(placements));
+  people.forEach(p=>{
+    const b=document.createElement('button');
+    b.className='char'+(selected===p.id?' selected':'')+(placedIds.has(p.id)?' placed':'');
+    b.innerHTML=`<span class="avatar">${p.initials}</span><span><strong>${p.name}</strong><small>${p.clue}</small></span>${p.victim?'<span class="victim-tag">víctima</span>':''}`;
+    b.onclick=()=>{selected=p.id;mode='place';setModes();renderCharacters();};
+    chars.appendChild(b);
+  });
+}
+
+function cellKey(r,c){return `${r}-${c}`}
+function personAtRow(r){return Object.keys(placements).find(k=>+k.split('-')[0]===r)}
+function personAtCol(c){return Object.keys(placements).find(k=>+k.split('-')[1]===c)}
+
+function renderGrid(){
+  grid.innerHTML='';
+  for(let r=0;r<5;r++){
+    for(let c=0;c<5;c++){
+      const k=cellKey(r,c);
+      const el=document.createElement('div');
+      el.className=`cell room-${roomClass[rooms[r][c]]}`;
+      el.dataset.key=k;
+      el.innerHTML=`<span class="room">${rooms[r][c]}</span><span class="coord">${String.fromCharCode(65+c)}${r+1}</span>${objects[k]?`<span class="object">${objects[k]}</span>`:''}`;
+      if(notes.has(k)) el.insertAdjacentHTML('beforeend','<span class="xmark">×</span>');
+      const pid=placements[k];
+      if(pid){
+        const p=people.find(x=>x.id===pid);
+        el.insertAdjacentHTML('beforeend',`<span class="person ${p.victim?'victim':''}" title="${p.name}">${p.initials}</span>`);
+      }
+      el.onclick=()=>handleCell(r,c);
+      grid.appendChild(el);
+    }
+  }
+  status.textContent=`${Object.keys(placements).length} / 5 colocados`;
+  renderCharacters();
+}
+
+function clearPerson(pid){
+  for(const k of Object.keys(placements)) if(placements[k]===pid) delete placements[k];
+}
+
+function handleCell(r,c){
+  const k=cellKey(r,c);
+  msg.textContent=''; msg.className='message';
+  if(mode==='note'){
+    if(placements[k]) {show('Primero borra la persona de esa casilla.','warn'); return;}
+    notes.has(k)?notes.delete(k):notes.add(k); renderGrid(); return;
+  }
+  if(mode==='erase'){
+    if(placements[k]) delete placements[k];
+    notes.delete(k); renderGrid(); return;
+  }
+  const previousKey = Object.keys(placements).find(key=>placements[key]===selected);
+  clearPerson(selected);
+  const rowOccupied=personAtRow(r), colOccupied=personAtCol(c);
+  if(rowOccupied || colOccupied){
+    if(previousKey) placements[previousKey]=selected;
+    show('Esa fila o columna ya tiene una persona.','warn');
+    renderGrid(); return;
+  }
+  notes.delete(k);
+  placements[k]=selected;
+  renderGrid();
+}
+
+function setModes(){
+  document.querySelectorAll('.tool').forEach(x=>x.classList.remove('active'));
+  document.getElementById(mode==='place'?'placeMode':mode==='note'?'noteMode':'eraseMode').classList.add('active');
+}
+document.getElementById('placeMode').onclick=()=>{mode='place';setModes()};
+document.getElementById('noteMode').onclick=()=>{mode='note';setModes()};
+document.getElementById('eraseMode').onclick=()=>{mode='erase';setModes()};
+
+function show(text,type=''){msg.textContent=text;msg.className='message '+type}
+function isSolved(){
+  const keys=Object.keys(solution);
+  return keys.every(k=>placements[k]===solution[k]) && Object.keys(placements).length===5;
+}
+document.getElementById('check').onclick=()=>{
+  if(Object.keys(placements).length<5){show('Aún faltan personajes por colocar.','warn');return;}
+  if(isSolved()){show('¡Caso resuelto!','ok');document.getElementById('win').showModal();}
+  else show('Todavía hay alguna posición incorrecta. Revisa las pistas.','bad');
+};
+document.getElementById('reset').onclick=()=>{
+  placements={};notes.clear();selected='nora';mode='place';hintIndex=0;setModes();renderGrid();show('Tablero reiniciado.');
+};
+const hints=[
+ 'Empieza por Nora: solo hay una alfombra, en C1.',
+ 'La ventana está en A2, así que Vera debe estar justo debajo.',
+ 'El sofá está en C4; Leo está justo a su derecha.',
+ 'Cuando hayas usado las filas 1, 3 y 4, la pista de Marcos en la columna E queda casi resuelta.',
+ 'Álex ocupa la única fila y columna que quedan libres.'
+];
+document.getElementById('hint').onclick=()=>{
+  show('Pista: '+hints[Math.min(hintIndex,hints.length-1)],'warn');
+  hintIndex++;
+};
+
+setModes();renderGrid();
+</script>
+</body>
+</html>
