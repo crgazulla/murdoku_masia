@@ -502,6 +502,80 @@
     text-transform:uppercase;
   }
 
+
+  /* Nombres completos dentro de las casillas */
+  .candidate-layer{
+    position:absolute;
+    inset:7% 6% 7% 6%;
+    display:flex;
+    flex-wrap:wrap;
+    align-content:flex-start;
+    gap:3px;
+    z-index:28;
+    pointer-events:none;
+  }
+  .candidate{
+    width:auto;
+    min-width:0;
+    height:auto;
+    aspect-ratio:auto;
+    padding:2px 4px;
+    border-radius:999px;
+    white-space:nowrap;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    background:#252724;
+    color:#fff;
+    font:800 clamp(4px,.52vw,7px)/1 ui-sans-serif,system-ui;
+    box-shadow:0 1px 2px #0002;
+  }
+  .candidate.victim{background:var(--accent)}
+
+  .locked-person{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:auto;
+    max-width:88%;
+    height:auto;
+    aspect-ratio:auto;
+    padding:5px 7px;
+    border-radius:999px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#252724;
+    color:#fff;
+    border:2px solid rgba(255,255,255,.86);
+    box-shadow:0 3px 9px #0002;
+    font:800 clamp(7px,.9vw,11px)/1 ui-sans-serif,system-ui;
+    white-space:nowrap;
+    z-index:29;
+  }
+  .locked-person.victim{background:var(--accent)}
+
+  /* X perfectamente centrada respecto a su propia casilla */
+  .xmark{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    padding:0!important;
+    margin:0!important;
+    font:950 clamp(54px,8vw,104px)/.8 ui-sans-serif,system-ui!important;
+    color:rgba(183,71,63,.93)!important;
+    z-index:30!important;
+    transform:none!important;
+    transform-origin:center center!important;
+    pointer-events:none!important;
+    text-align:center!important;
+  }
+
 </style>
 </head>
 <body>
@@ -856,7 +930,7 @@ function renderGrid(){
         el.insertAdjacentHTML('beforeend','<span class="xmark">×</span>');
       } else if(locked[k]){
         const p=people.find(x=>x.id===locked[k]);
-        el.insertAdjacentHTML('beforeend',`<span class="locked-person ${p.victim?'victim':''}" title="${p.name}">${p.initials}</span>`);
+        el.insertAdjacentHTML('beforeend',`<span class="locked-person ${p.victim?'victim':''}" title="${p.name}">${p.name}</span>`);
       } else if(candidates[k] && candidates[k].size){
         const layer=document.createElement('div');
         layer.className='candidate-layer';
@@ -865,7 +939,7 @@ function renderGrid(){
           const s=document.createElement('span');
           s.className='candidate'+(p.victim?' victim':'');
           s.title=p.name;
-          s.textContent=p.initials;
+          s.textContent=p.name;
           layer.appendChild(s);
         });
         el.appendChild(layer);
