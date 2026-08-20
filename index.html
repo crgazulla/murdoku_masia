@@ -604,14 +604,15 @@
     <section class="board-wrap">
       <div class="topline">
         <div class="eyebrow">Escena del crimen</div>
-        <div class="status" id="status">0 / 5 colocados</div>
+        <div class="status" id="status">0 / 8 fijados</div>
       </div>
       <div class="grid" id="grid" aria-label="Cuadrícula de Murdoku"></div>
       <div class="legend">
-        <span>🌲 árboles · bloquean</span>
-        <span>🐜 hormigas · bloquean</span>
+        <span>🐜 hormigas · permiten personaje</span>
+        <span>🥔 bolsas · bloquean</span>
         <span>mesa · bloquea</span>
-        <span>silla y caballo · sí permiten personaje</span>
+        <span>🎺 trompeta · solo Jaime</span>
+        <span>caballo · permite personaje</span>
       </div>
       <div class="actions">
         <button class="secondary" id="reset">Reiniciar</button>
@@ -789,9 +790,7 @@ function canUsePinarCell(personId, key){
 
 function canUseTrumpetCell(personId, key){
   if(!trumpetCells.has(key)) return true;
-  const [r,c] = key.split('-').map(Number);
-  const room = rooms[r][c];
-  return personId === 'jaime' && (room === 'Pinar 1' || room === 'Pinar 2');
+  return personId === 'jaime';
 }
 
 let selected='abel';
@@ -967,7 +966,7 @@ function toggleCandidate(r,c){
   const k=cellKey(r,c);
   if(inactiveCells.has(k)) return;
   if(!canUsePinarCell(selected,k)){show('En el pinar solo pueden estar Clara, Jaime y Juver.','warn');return}
-  if(!canUseTrumpetCell(selected,k)){show("Jaime solo puede tocar una trompeta si está en el pinar.",'warn');return}
+  if(!canUseTrumpetCell(selected,k)){show("Solo Jaime, el trompeta de The Poncho's, puede estar sobre una trompeta.",'warn');return}
   if(permanentBlocked.has(k)){show('Esa casilla está ocupada por un elemento del escenario.','warn');return}
   if(blocked.has(k)){show('Esa casilla está descartada. Haz doble clic para quitar la ✕.','warn');return}
   if(locked[k]){
@@ -999,7 +998,7 @@ function toggleLock(r,c){
   const k=cellKey(r,c);
   if(inactiveCells.has(k)) return;
   if(!canUsePinarCell(selected,k)){show('En el pinar solo pueden estar Clara, Jaime y Juver.','warn');return}
-  if(!canUseTrumpetCell(selected,k)){show("Jaime solo puede tocar una trompeta si está en el pinar.",'warn');return}
+  if(!canUseTrumpetCell(selected,k)){show("Solo Jaime, el trompeta de The Poncho's, puede estar sobre una trompeta.",'warn');return}
   if(permanentBlocked.has(k)){show('No se puede colocar a nadie sobre ese elemento.','warn');return}
   if(blocked.has(k))blocked.delete(k);
 
@@ -1078,7 +1077,7 @@ const hints=[
   'Laura está en la Piscina, pero no frente a ninguna puerta.',
   'Elena está en la fila 8.',
   'Juver está justo frente a una mesa.',
-  'Jaime es el trompeta de The Poncho's. Solo él toca la trompeta.',
+  "Jaime es el trompeta de The Poncho's. Solo él toca la trompeta.",
   'Juan es la víctima. Cuando coloques al resto, busca quién queda a solas con él en la misma zona.'
 ];
 document.getElementById('hint').onclick=()=>{
