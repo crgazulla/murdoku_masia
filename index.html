@@ -586,6 +586,13 @@
     vertical-align:baseline;
   }
 
+
+  .object.fridge{inset:3%!important}
+  .object.fridge svg{
+    width:100%;
+    height:100%;
+    filter:drop-shadow(3px 5px 1px rgba(29,30,26,.22));
+  }
 </style>
 </head>
 <body>
@@ -594,7 +601,7 @@
     <div>
       <div class="eyebrow">Caso 001 · Medio</div>
       <h1>Asesinato en la masía</h1>
-      <p class="dek">Un túrgido ha muerto en extrañas circunstancias. Usa las pistas para deducir dónde estaba cada túrgido y descubrir quien ha sido el asesino. Recuerda que solo los músicos pueden estar en el pinar!!</p>
+      <p class="dek">Un túrgido ha muerto en extrañas circunstancias. Usa las pistas para deducir dónde estaba cada túrgido y descubrir quien ha sido el asesino. Recuerda que solo los músicos ♪ pueden estar en el pinar!!</p>
     </div>
     <div class="badge">8 personas · tablero irregular</div>
   </header>
@@ -602,7 +609,7 @@
   <main class="layout">
     <aside class="panel">
       <h2>Personajes y pistas</h2>
-      <p class="rules"><b>Cómo jugar:</b> selecciona un personaje. <b>Un clic</b> añade o quita su inicial pequeña. <b>Mantén pulsado</b> para fijarlo. <b>Doble clic</b> pone una ✕. Las mesas y las bolsas bloquean casillas; las hormigas y el caballo no. <b>Importante:</b> solo los músicos pueden estar en el pinar.</p>
+      <p class="rules"><b>Cómo jugar:</b> selecciona un personaje. <b>Un clic</b> añade o quita su inicial pequeña. <b>Mantén pulsado</b> para fijarlo. <b>Doble clic</b> pone una ✕. Los caballos, las mesas y las bolsas de patatas fritas no pueden estar ocupados; las hormigas sí permiten personaje. <b>Importante:</b> solo los músicos pueden estar en el pinar.</p>
       <div class="characters" id="characters"></div>
       <div class="tools">
         <span class="tool active">1 clic · posibilidad</span>
@@ -618,11 +625,7 @@
       </div>
       <div class="grid" id="grid" aria-label="Cuadrícula de Murdoku"></div>
       <div class="legend">
-        <span>🐜 hormigas · permiten personaje</span>
-        <span>🥔 bolsas · bloquean</span>
-        <span>mesa · bloquea</span>
-        <span>🎺 trompeta · solo Jaime</span>
-        <span>caballo · permite personaje</span>
+        <span><b>Objetos que no pueden estar ocupados:</b> caballo (recuerda que son de competición!), mesa, bolsas de patatas fritas</span>
       </div>
       <div class="actions">
         <button class="secondary" id="reset">Reiniciar</button>
@@ -655,7 +658,7 @@ const people = [
   {id:'clara', name:'Clara', initials:'CL', clue:'Estaba frente a una puerta.', victim:false},
   {id:'laura', name:'Laura', initials:'LA', clue:'Estaba en la Piscina. No estaba frente a una puerta.', victim:false},
   {id:'sergio', name:'Sergio', initials:'SE', clue:'Estaba en la fila inferior.', victim:false},
-  {id:'juver', name:'Juver', initials:'JV', clue:'Estaba junto a una mesa.', victim:false},
+  {id:'juver', name:'Juver', initials:'JV', clue:'Estaba frente a una mesa.', victim:false},
   {id:'jaime', name:'Jaime', initials:'JA', clue:"Es el trompeta de The Poncho's. Solo él toca la trompeta.", victim:false},
   {id:'juan', name:'Juan', initials:'JN', clue:'La víctima. Estaba a solas con el asesino.', victim:true}
 ];
@@ -716,7 +719,7 @@ const zoneLabels = {
 */
 const objects = {
   '0-2':[{type:'ants',blocking:false}],
-  '0-5':[{type:'horse',blocking:false}],
+  '0-5':[{type:'horse',blocking:true}],
   '0-7':[{type:'trumpet',blocking:false}],
 
   '1-2':[{type:'chips',blocking:true}],
@@ -729,11 +732,11 @@ const objects = {
   '3-4':[{type:'chips',blocking:true}],
   '3-7':[{type:'ants',blocking:false}],
 
-  '4-0':[{type:'horse',blocking:false}],
+  '4-0':[{type:'horse',blocking:true}],
 
   '6-0':[{type:'ants',blocking:false}],
   '6-2':[{type:'table',blocking:true}],
-  '6-6':[{type:'trumpet',blocking:false}],
+  '6-6':[{type:'fridge',blocking:true}],
 
   '7-1':[{type:'trumpet',blocking:false}],
   '7-3':[{type:'trumpet',blocking:false}],
@@ -850,6 +853,18 @@ function iconSVG(type){
   if(type==='table') return `<img class="reference-object-img" src="${TABLE_IMG}" alt="Mesa">`;
   if(type==='trumpet-old-unused') return `<img class="reference-object-img" src="${CHAIR_IMG}" alt="Silla">`;
   if(type==='horse') return `<img class="reference-object-img horse-img" src="${HORSE_IMG}" alt="Caballo">`;
+
+  if(type==='fridge') return `<svg viewBox="0 0 120 150" aria-hidden="true">
+    <g stroke="#252724" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="20" y="6" width="80" height="134" rx="12" fill="#d8dddb"/>
+      <path d="M20 65h80" fill="none"/>
+      <rect x="33" y="19" width="10" height="35" rx="5" fill="#f3f5f4"/>
+      <rect x="33" y="79" width="10" height="40" rx="5" fill="#f3f5f4"/>
+      <path d="M30 140v6M90 140v6" fill="none"/>
+    </g>
+    <path d="M27 14h66v43H27z" fill="#eef2f0" opacity=".55"/>
+    <path d="M27 72h66v60H27z" fill="#c8cfcc" opacity=".48"/>
+  </svg>`;
 
   if(type==='trumpet') return `<svg viewBox="0 0 150 110" aria-hidden="true">
     <g stroke="#252724" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
