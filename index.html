@@ -640,7 +640,7 @@
 <dialog id="win">
   <div class="modal">
     <div class="eyebrow">Caso resuelto</div>
-    <h2 class="big-solved">UN NUEVO CASO RESUELTO!!</h2>
+    <h2 class="big-solved">ENHORABUENA!! CASO RESUELTO</h2>
     <p>Juan estaba en <b>G4</b>. La solución completa es:</p>
     <p>Abel A3 · Julia E5 · Clara C6 · Laura D2 · Sergio F8 · Juver B7 · Jaime H1 · Juan G4.</p>
     <button class="primary" onclick="document.getElementById('win').close()">Cerrar</button>
@@ -656,7 +656,7 @@ const people = [
   {id:'abel', name:'Abel', initials:'AB', clue:'Era la única persona pisando hormigas.', victim:false},
   {id:'julia', name:'Julia', initials:'JU', clue:'Estaba junto a una bolsa de patatas fritas.', victim:false},
   {id:'clara', name:'Clara', initials:'CL', clue:'Estaba frente a una puerta.', victim:false},
-  {id:'laura', name:'Laura', initials:'LA', clue:'Estaba en la Piscina. No estaba frente a una puerta.', victim:false},
+  {id:'laura', name:'Laura', initials:'LA', clue:'Estaba en la piscina. No estaba frente a una puerta.', victim:false},
   {id:'sergio', name:'Sergio', initials:'SE', clue:'Estaba en la fila inferior.', victim:false},
   {id:'juver', name:'Juver', initials:'JV', clue:'Estaba frente a una mesa.', victim:false},
   {id:'jaime', name:'Jaime', initials:'JA', clue:"Es el trompeta de The Poncho's. Solo él toca la trompeta.", victim:false},
@@ -1097,14 +1097,8 @@ document.getElementById('reset').onclick=()=>{
 };
 
 const hints=[
-  'Abel es la única persona que está sobre una casilla con hormigas.',
-  'Julia está en una casilla ortogonalmente adyacente a una bolsa de patatas.',
-  'Clara está frente a una de las puertas dibujadas en los muros.',
-  'Laura está en la Piscina, pero no frente a ninguna puerta.',
-  'Sergio está en la fila 8.',
-  'Juver está justo frente a una mesa.',
-  "Jaime es el trompeta de The Poncho's. Solo él toca la trompeta.",
-  'Juan es la víctima. Cuando coloques al resto, busca quién queda a solas con él en la misma zona.'
+  'No te rindas tan rápido!',
+  'En serio, no hay pistas'
 ];
 document.getElementById('hint').onclick=()=>{
   show('Pista: '+hints[Math.min(hintIndex,hints.length-1)],'warn');
